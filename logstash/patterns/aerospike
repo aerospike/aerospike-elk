@@ -1,0 +1,10 @@
+AS_TZ (?:GMT)
+AS_LOGDATE (?:%{MONTH}(?: )%{MONTHDAY}(?: )%{YEAR}(?: )%{TIME}(?: )%{AS_TZ})
+AS_LOGLEVEL (?:CRITICAL|WARNING|INFO|DEBUG|DETAIL)
+AS_CONTEXT (?:%{WORD:parent_context}(:%{WORD:subcontext})?)
+AS_FILENAME (?:[a-zA-Z0-9_.]+)
+AS_FUNCTION (?:[a-zA-Z0-9_]+)
+AS_LINENUMBER (?:%{INT})
+AS_FILE (?:%{AS_FILENAME:filename}:%{AS_FUNCTION:function}?:%{AS_LINENUMBER:linenumber})
+AS_REST (?:.*)
+AS_LOGLINE %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )%{AS_REST:rest}
