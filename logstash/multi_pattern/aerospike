@@ -1,0 +1,14 @@
+AS_TZ (?:GMT)
+AS_LOGDATE (?:%{MONTH}(?: )%{MONTHDAY}(?: )%{YEAR}(?: )%{TIME}(?: )%{AS_TZ})
+AS_LOGLEVEL (?:CRITICAL|WARNING|INFO|DEBUG|DETAIL)
+AS_CONTEXT (?:%{WORD:parent_context}(:%{WORD:subcontext})?)
+AS_FILENAME (?:[a-zA-Z0-9_.]+)
+AS_LINENUMBER (?:%{INT})
+AS_FILE (?:%{AS_FILENAME:filename}:%{AS_LINENUMBER:linenumber})
+AS_REST (?:.*)
+HIST_STAT (%{WORD:stat_cat}: %{WORD:stat} %{INT:value})
+AS_HEADER %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
+
+AS_TICK %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])ticker.c:%{AS_LINENUMBER:linenumber}(?:[)]    )%{AS_REST:rest}
+
+HISTOGRAM %{AS_HEADER} (\(\d{2}: \d+\) ){1,4}
