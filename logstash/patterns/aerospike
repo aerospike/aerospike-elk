@@ -10,11 +10,9 @@ AS_FILENAME (?:[a-zA-Z0-9_.]+)
 AS_LINENUMBER (?:%{INT})
 AS_FILE (?:%{AS_FILENAME:filename}:%{AS_LINENUMBER:linenumber})
 AS_REST (?:.*)
-#TICK_TUPLE %{INT},%{INT},%{INT}
 PROTO_TUPLE \(%{INT:open_conn:int},%{INT:opened_conn:int},%{INT:closed_conn:int}\)
 HB_TUPLE \(%{INT:hb_open_conn:int},%{INT:hb_opened_conn:int},%{INT:hb_closed_conn:int}\)
 FABRIC_TUPLE \(%{INT:fab_open_conn:int},%{INT:fab_opened_conn:int},%{INT:fab_closed_conn:int}\)
-HIST_TUPLE (?: \(%{INT}: %{INT}\))+
 AS_NAMESPACE ([\-\w]{0,31})
 AS_HEADER %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
 
@@ -33,9 +31,9 @@ AS_NS_MEM %{AS_HEADER}{%{AS_NAMESPACE:namespace}} memory-usage: total-bytes %{IN
 AS_NS_DEV %{AS_HEADER}{%{AS_NAMESPACE:namespace}} device-usage: used-bytes %{INT:used-bytes:int} avail-pct %{NUMBER:avail-pct:float}( cache-read-pct %{NUMBER:cache-read-pct:float})?
 AS_NS_CLIENT %{AS_HEADER}{%{AS_NAMESPACE:namespace}} client: tsvc \(%{INT:client_tsvc_error:int},%{INT:client_tsvc_timeout:int}\) proxy \(%{INT:client_proxy_complete:int},%{INT:client_proxy_error:int},%{INT:client_proxy_timeout:int}\) read \(%{INT:client_read_success:int},%{INT:client_read_error:int},%{INT:client_read_timeout:int},%{INT:client_read_not_found:int}\) write \(%{INT:client_write_success:int},%{INT:client_write_error:int},%{INT:client_write_timeout:int}\) del(ete)? \(%{INT:client_del_success:int},%{INT:client_del_error:int},%{INT:client_del_timeout:int},%{INT:client_del_not_found:int}\) udf \(%{INT:client_udf_success:int},%{INT:client_udf_error:int},%{INT:client_udf_timeout:int}\) lang \(%{INT:client_lang_read_success:int},%{INT:client_lang_write_success:int},%{INT:client_lang_delete_success:int},%{INT:client_lang_error:int}\)
 AS_NS_BATCH %{AS_HEADER}{%{AS_NAMESPACE:namespace}} batch-sub: tsvc \(%{INT:batch_tsvc_error:int},%{INT:batch_tsvc_timeout:int}\) proxy \(%{INT:batch_proxy_complete:int},%{INT:batch_proxy_error:int},%{INT:batch_proxy_timeout:int}\) read \(%{INT:batch_read_success:int},%{INT:batch_read_error:int},%{INT:batch_read_timeout:int},%{INT:batch_read_not_found:int}\)
-AS_NS_SCAN %{AS_HEADER}{%{AS_NAMESPACE:namespace}} scan: basic \(,,\) aggr \(,,\) udf-bg \(,,\)
-AS_NS_QUERY %{AS_HEADER}{%{AS_NAMESPACE:namespace}} query: basic \(,\) aggr \(,\) udf-bg \(,\)
-AS_NS_UDF %{AS_HEADER}{%{AS_NAMESPACE:namespace}} udf-sub: tsvc \(,\) udf \(,,\) lang \(,,,\)
+AS_NS_SCAN %{AS_HEADER}{%{AS_NAMESPACE:namespace}} scan: basic \(%{INT:scan-basic-success:int},%{INT:scan-basic-error},%{INT:scan-basic-aborted}\) aggr \(%{INT:scan-aggr-success},%{INT:scan-aggr-error},%{INT:scan-aggr-aborted}\) udf-bg \(%{INT:scan-udf-bg-success:int},%{INT:scan-udf-bg-error:int},%{INT:scan-udf-bg-abort:int}\)
+AS_NS_QUERY %{AS_HEADER}{%{AS_NAMESPACE:namespace}} query: basic \(%{INT:query-basic-success:int},%{INT:query-basic-error:int}\) aggr \(%{INT:query-aggr-success:int},%{INT:query-aggr-error:int}\) udf-bg \(%{INT:query-udf-bg:int},%{INT:query-udf-bg:int}\)
+AS_NS_UDF %{AS_HEADER}{%{AS_NAMESPACE:namespace}} udf-sub: tsvc \(%{INT:udf-sub-tsvc-error:int},%{INT:udf-sub-tsvc-timeout:int}\) udf \(%{INT:udf-sub-udf-complete:int},%{INT:udf-sub-udf-error},%{INT:udf-sub-udf-timeout:int}\) lang \(%{INT:udf-sub-lang-read:int},%{INT:udf-sub-lang-write:int},%{INT:udf-sub-lang-delete:int},%{INT:udf-sub-lang-error:int}\)
 
 # Namespace metrics
 AS_NS_BLOCK ${AS_HEADER}{%{AS_NAMESPACE:namespace}} %{PATH:device}: used-bytes %{INT:device-used-bytes:int} free-wblocks %{INT:free-wblocks:int} write-q %{INT:write-q:int} write \(%{INT:w-tot:int},%{NUMBER:writes-per-s:float}\) defrag-q %{INT:defrag-q:int} defrag-read \(%{INT:defrag-read:int},%{NUMBER:defrag-read-per-s:float}\) defrag-write \(%{INT:defrag-write:int},%{NUMBER:defrag-write-per-s:float}\) tomb-raider-read \(%{INT:tomb-raider-read:int},%{NUMBER:tomb-raider-read-per-s:float\)
@@ -44,7 +42,6 @@ AS_DEVICE %{AS_HEADER}device %{PATH:device}: used %{INT:device-used-bytes:int}, 
 
 
 # HISTOGRAM
-HISTOGRAM %{AS_HEADER}%{HIST_TUPLE:histogram}
 HIST_START (?:%{AS_HEADER}histogram dump: )({%{AS_NAMESPACE:namespace}}-)?%{NOTSPACE:hist-name} \(%{INT:operation-total:int} total\) msec
 
 # NSUP
@@ -69,5 +66,4 @@ AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{
 AS_TICK (?:%{AS_TICK_START}|%{AS_TICK_SYSTEM}|%{AS_TICK_PROG}|%{AS_TICK_FD}|%{AS_TICK_HB}|%{AS_TICK_FAIL}|%{AS_TICK_BATCH})
 AS_XDR (?:%{AS_XDR_SUMMARY}|%{AS_XDR_DETAIL}|%{AS_XDR_BASE}|%{AS_XDR_DLOG}|%{AS_XDR_DLOG_CLAIM})
 AS_LOG %{AS_HEADER}%{AS_REST:rest}
-AS_HIST (?:%{HISTOGRAM}|%{HIST_START})
 AS_NSUP (?:%{AS_NSUP_BASE}|%{AS_NSUP_WAITS})

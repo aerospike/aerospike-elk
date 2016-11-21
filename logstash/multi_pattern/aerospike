@@ -9,6 +9,4 @@ AS_REST (?:.*)
 HIST_STAT (%{WORD:stat_cat}: %{WORD:stat} %{INT:value})
 AS_HEADER %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
 
-AS_TICK %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])ticker.c:%{AS_LINENUMBER:linenumber}(?:[)]    )%{AS_REST:rest}
-
 HISTOGRAM %{AS_HEADER} (\(\d{2}: \d+\) ){1,4}
