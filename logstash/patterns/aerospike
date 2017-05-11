@@ -14,7 +14,7 @@ PROTO_TUPLE \(%{INT:open_conn:int},%{INT:opened_conn:int},%{INT:closed_conn:int}
 HB_TUPLE \(%{INT:hb_open_conn:int},%{INT:hb_opened_conn:int},%{INT:hb_closed_conn:int}\)
 FABRIC_TUPLE \(%{INT:fab_open_conn:int},%{INT:fab_opened_conn:int},%{INT:fab_closed_conn:int}\)
 AS_NAMESPACE ([\-\w]{0,31})
-AS_HEADER %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
+AS_HEADER %{AS_LOGDATE:logdate}([+-]\d{4})?(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
 
 # ticker.c 
 AS_TICK_START %{AS_HEADER}NODE-ID %{WORD:nodeid} CLUSTER-SIZE %{INT:cluster_size:int}
@@ -31,15 +31,13 @@ AS_NS_MEM %{AS_HEADER}{%{AS_NAMESPACE:namespace}} memory-usage: total-bytes %{IN
 AS_NS_DEV %{AS_HEADER}{%{AS_NAMESPACE:namespace}} device-usage: used-bytes %{INT:used-bytes:int} avail-pct %{NUMBER:avail-pct:float}( cache-read-pct %{NUMBER:cache-read-pct:float})?
 AS_NS_CLIENT %{AS_HEADER}{%{AS_NAMESPACE:namespace}} client: tsvc \(%{INT:client_tsvc_error:int},%{INT:client_tsvc_timeout:int}\) proxy \(%{INT:client_proxy_complete:int},%{INT:client_proxy_error:int},%{INT:client_proxy_timeout:int}\) read \(%{INT:client_read_success:int},%{INT:client_read_error:int},%{INT:client_read_timeout:int},%{INT:client_read_not_found:int}\) write \(%{INT:client_write_success:int},%{INT:client_write_error:int},%{INT:client_write_timeout:int}\) del(ete)? \(%{INT:client_del_success:int},%{INT:client_del_error:int},%{INT:client_del_timeout:int},%{INT:client_del_not_found:int}\) udf \(%{INT:client_udf_success:int},%{INT:client_udf_error:int},%{INT:client_udf_timeout:int}\) lang \(%{INT:client_lang_read_success:int},%{INT:client_lang_write_success:int},%{INT:client_lang_delete_success:int},%{INT:client_lang_error:int}\)
 AS_NS_BATCH %{AS_HEADER}{%{AS_NAMESPACE:namespace}} batch-sub: tsvc \(%{INT:batch_tsvc_error:int},%{INT:batch_tsvc_timeout:int}\) proxy \(%{INT:batch_proxy_complete:int},%{INT:batch_proxy_error:int},%{INT:batch_proxy_timeout:int}\) read \(%{INT:batch_read_success:int},%{INT:batch_read_error:int},%{INT:batch_read_timeout:int},%{INT:batch_read_not_found:int}\)
-AS_NS_SCAN %{AS_HEADER}{%{AS_NAMESPACE:namespace}} scan: basic \(%{INT:scan-basic-success:int},%{INT:scan-basic-error},%{INT:scan-basic-aborted}\) aggr \(%{INT:scan-aggr-success},%{INT:scan-aggr-error},%{INT:scan-aggr-aborted}\) udf-bg \(%{INT:scan-udf-bg-success:int},%{INT:scan-udf-bg-error:int},%{INT:scan-udf-bg-abort:int}\)
+AS_NS_SCAN %{AS_HEADER}{%{AS_NAMESPACE:namespace}} scan: basic \(%{INT:scan-basic-success:int},%{INT:scan-basic-error:int},%{INT:scan-basic-aborted:int}\) aggr \(%{INT:scan-aggr-success:int},%{INT:scan-aggr-error:int},%{INT:scan-aggr-aborted:int}\) udf-bg \(%{INT:scan-udf-bg-success:int},%{INT:scan-udf-bg-error:int},%{INT:scan-udf-bg-abort:int}\)
 AS_NS_QUERY %{AS_HEADER}{%{AS_NAMESPACE:namespace}} query: basic \(%{INT:query-basic-success:int},%{INT:query-basic-error:int}\) aggr \(%{INT:query-aggr-success:int},%{INT:query-aggr-error:int}\) udf-bg \(%{INT:query-udf-bg:int},%{INT:query-udf-bg:int}\)
 AS_NS_UDF %{AS_HEADER}{%{AS_NAMESPACE:namespace}} udf-sub: tsvc \(%{INT:udf-sub-tsvc-error:int},%{INT:udf-sub-tsvc-timeout:int}\) udf \(%{INT:udf-sub-udf-complete:int},%{INT:udf-sub-udf-error},%{INT:udf-sub-udf-timeout:int}\) lang \(%{INT:udf-sub-lang-read:int},%{INT:udf-sub-lang-write:int},%{INT:udf-sub-lang-delete:int},%{INT:udf-sub-lang-error:int}\)
+AS_NS_RETRANS %{AS_HEADER} retransmits: migration %{INT:retrans-migration:int} client-read %{INT:retrans-read-dup-res:int} client-write \(%{INT:retrans-write-dup-res:int},%{INT:retrans-write-repl-write:int}\) client-delete \(%{INT:retrans-delete-dup-res:int},%{INT:retrans-delete-repl-write:int}\) client-udf \(%{INT:retrans-udf-dup-res:int},%{INT:retrans-udf-repl-write:int}\) batch-sub %{INT:retrans-batch-sub:int} udf-sub \(%{INT:retrans-udf-sub-dup-res:int},%{INT:retrans-udf-sub-repl-write:int}\) nsup %{INT:retrans-nsup:int}
 
-# Namespace metrics
-AS_NS_BLOCK ${AS_HEADER}{%{AS_NAMESPACE:namespace}} %{PATH:device}: used-bytes %{INT:device-used-bytes:int} free-wblocks %{INT:free-wblocks:int} write-q %{INT:write-q:int} write \(%{INT:w-tot:int},%{NUMBER:writes-per-s:float}\) defrag-q %{INT:defrag-q:int} defrag-read \(%{INT:defrag-read:int},%{NUMBER:defrag-read-per-s:float}\) defrag-write \(%{INT:defrag-write:int},%{NUMBER:defrag-write-per-s:float}\) tomb-raider-read \(%{INT:tomb-raider-read:int},%{NUMBER:tomb-raider-read-per-s:float\)
-# deprecated in 3.10, see AS_NS_BLOCk
-AS_DEVICE %{AS_HEADER}device %{PATH:device}: used %{INT:device-used-bytes:int}, contig-free %{INT:contig-free:int}M \(%{INT:free-wblocks:int} wblocks\), swb-free %{INT:swb-free:int}, w-q %{INT:write-q:int} w-tot %{INT:w-tot:int} \(%{NUMBER:writes-per-s:float}/s\), defrag-q %{INT:defrag-q:int} defrag-tot %{INT:defrag-read:int} \(%{NUMBER:defrag-read-per-s:float}/s\) defrag-w-tot %{INT:defrag-write:int} \(%{NUMBER:defrag-write-per-s:int}/s\)
-
+# Tombstone
+TOMBSTONES %{AS_HEADER}{%{AS_NAMESPACE:namespace}} tombstones: all %{INT:tombstones:int} master %{INT:tomb-master:int} prole %{INT:tomb-prole:int}
 
 # HISTOGRAM
 HIST_START (?:%{AS_HEADER}histogram dump: )({%{AS_NAMESPACE:namespace}}-)?%{NOTSPACE:hist-name} \(%{INT:operation-total:int} total\) msec
@@ -52,18 +50,26 @@ AS_NSUP_WAITS %{AS_HEADER}nsup clear waits: %{INT:nsup-clear-waits:int}
 
 AS_SINDEX %{AS_HEADER}ns=%{AS_NAMESPACE:namespace} si=%{NOTSPACE:sindexes} obj-scanned=%{INT:sindex-obj-scanned:int} si-mem-used=%{INT:sindex-mem-used:int} progress=( )?%{INT:sindex-pct:int}\% est-time=%{INT:sindex-est-time:int} ms
 
+# Fabric, new in 3.11.1.1
+AS_FABRIC %{AS_HEADER}fabric-bytes-per-second: bulk \(%{INT:bulk-rx:int},%{INT:bulk-tx:int}\) ctrl \(%{INT:ctrl-rx:int},%{INT:ctrl-tx:int}\) meta \(%{INT:meta-rx:int},%{INT:mta-tx:int}\) rw \(%{INT:rw-rx:int},%{INT:rw-tx:int}\)
 
 # XDR logs
-AS_XDR_SUMMARY %{AS_HEADER}summary: throughput %{INT:xdr-throughput:int} inflight %{INT:xdr-inflight:int} dlog-outstanding %{INT:xdr-dlog-outstanding:int} dlog-delta-per-sec %{NUMBER:xdr-dlog-delta-per-s:float}
-AS_XDR_DETAIL %{AS_HEADER}detail: sh %{INT:xdr-shipped:int} ul %{INT:xdr-ul:int} lg %{INT:xdr-lg:int} rlg %{INT:xdr-rlg:int} lproc %{INT:xdr-lproc:int} rproc %{INT:xdr-rproc:int} lkdproc %{INT:xdr-lkdproc:int}( :)? errcl %{INT:xdr-errcl:int} errsrv %{INT:xdr-errsrv:int} hkskip %{INT:xdr-hkskip:int} hkf %{INT:xdr-hkf:int} flat %{INT:xdr-flat:int}
-AS_XDR_BASE %{AS_HEADER}\[%{NOTSPACE:dc_name}\]: dc-state %{WORD:dc_status} timelag-sec %{INT:timelag:int} lst %{INT:last-ship-time:int} mlst %{INT:main-last-ship-time:int} \(%{AS_XDR_DATE:mlst-date}\) fnlst %{INT:failed-last-ship-time:int} \(%{NOTSPACE:flast-date}\) wslst %{INT:window-last-ship-time:int} \(%{NOTSPACE:wslst-date}\) shlat-ms %{NUMBER:xdr-shlat-ms:float} rsas-ms %{NUMBER:xdr-rsas-ms:float} rsas-pct %{NUMBER:xdr-rsas-pct:float}
-AS_XDR_DLOG %{AS_HEADER}dlog-q: capacity %{INT:xdr-dlog-cap:int} used-elements %{INT:xdr-dlog-used:int} read-offset %{INT:xdr-dlog-read-offset:int} write-offset %{INT:xdr-dlog-write-offset:int}
-AS_XDR_DLOG_CLAIM %{AS_HEADER}dlog: reclaimed %{INT:xdr-dlog-reclaimed:int}
+AS_XDR_SUMMARY %{AS_HEADER}(summary: )?throughput %{INT:xdr-throughput:int}( :)? inflight %{INT:xdr-inflight:int}( :)? dlog[\- ]outstanding %{INT:xdr-dlog-outstanding:int} (dlog-delta-per-sec |\((delta )?)%{NUMBER:xdr-dlog-delta-per-s:float}(/s\))?
+AS_XDR_DETAIL %{AS_HEADER}(detail: )?sh %{INT:xdr-shipped:int}( :)? ul %{INT:xdr-ul:int}( :)? lg %{INT:xdr-lg:int}( :)? rlg %{INT:xdr-rlg:int}( :)?( rlgi %{INT:xdr-rlgi:int} rlgo %{INT:xdr-rlgo:int})? lproc %{INT:xdr-lproc:int}( :)? rproc %{INT:xdr-rproc:int}( :)? lkdproc %{INT:xdr-lkdproc:int}( :)? errcl %{INT:xdr-errcl:int}( :)? errsrv %{INT:xdr-errsrv:int}( :)? hkskip %{INT:xdr-hkskip:int}( hkf)? %{INT:xdr-hkf:int}( :)? flat %{INT:xdr-flat:int}
+AS_XDR_BASE %{AS_HEADER}\[%{NOTSPACE:dc_name}\](: dc-state)? %{WORD:dc_status}( :)? timelag(-sec)? %{INT:timelag:int}( secs :)? lst %{INT:last-ship-time:int}( :)? mlst %{INT:main-last-ship-time:int} \(%{AS_XDR_DATE:mlst-date}\)( :)? fnlst %{INT:failed-last-ship-time:int} \(%{NOTSPACE:flast-date}\)( :)? wslst %{INT:window-last-ship-time:int} \(%{NOTSPACE:wslst-date}\)( :)? shlat(-ms)? %{NUMBER:xdr-shlat-ms:float}( rsas-ms %{NUMBER:xdr-rsas-ms:float} rsas-pct %{NUMBER:xdr-rsas-pct:float})?( con %{INT:xdr-con:int} errcl %{INT:xdr-errcl:int} errsrv %{INT:xdr-errsrv:int} sz %{INT:xdr-sz:int})?
+AS_XDR_DLOG %{AS_HEADER}(dlog-q: capacity |logq : \()%{INT:xdr-dlog-cap:int} (used-elements )?%{INT:xdr-dlog-used:int} (read-offset )?%{INT:xdr-dlog-read-offset:int} (write-offset )?%{INT:xdr-dlog-write-offset:int}(\))?
+AS_XDR_DLOG_CLAIM %{AS_HEADER}(dlog: )?[Rr]eclaimed %{INT:xdr-dlog-reclaimed:int}%{AS_REST}
 
 
 # OVERALL FILTERS
-AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{AS_NS_CLIENT}|%{AS_NS_BATCH}|%{AS_NS_SCAN}|%{AS_NS_QUERY}|%{AS_NS_UDF}|%{AS_DEVICE})
+#AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{AS_NS_CLIENT}|%{AS_NS_BATCH}|%{AS_NS_SCAN}|%{AS_NS_QUERY}|%{AS_NS_UDF}|%{AS_DEVICE}|%{AS_NS_BLOCK})
+AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{AS_NS_CLIENT}|%{AS_NS_BATCH}|%{AS_NS_SCAN}|%{AS_NS_QUERY}|%{AS_NS_UDF}|%{AS_NS_RETRANS})
 AS_TICK (?:%{AS_TICK_START}|%{AS_TICK_SYSTEM}|%{AS_TICK_PROG}|%{AS_TICK_FD}|%{AS_TICK_HB}|%{AS_TICK_FAIL}|%{AS_TICK_BATCH})
 AS_XDR (?:%{AS_XDR_SUMMARY}|%{AS_XDR_DETAIL}|%{AS_XDR_BASE}|%{AS_XDR_DLOG}|%{AS_XDR_DLOG_CLAIM})
 AS_LOG %{AS_HEADER}%{AS_REST:rest}
 AS_NSUP (?:%{AS_NSUP_BASE}|%{AS_NSUP_WAITS})
+
+# Device metrics
+AS_DEVICE_3_10 %{AS_HEADER}{%{AS_NAMESPACE:namespace}} %{PATH:device} used-bytes %{INT:device-used-bytes:int} free-wblocks %{INT:free-wblocks:int} write-q %{INT:write-q:int} write \(%{INT:w-tot:int},%{NUMBER:writes-per-s:float}\) defrag-q %{INT:defrag-q:int} defrag-read \(%{INT:defrag-read:int},%{NUMBER:defrag-read-per-s:float}\) defrag-write \(%{INT:defrag-write:int},%{NUMBER:defrag-write-per-s:float}\) ?(tomb-raider-read \(%{INT:tomb-raider-read:int},%{NUMBER:tomb-raider-read-per-s:float}\))?
+AS_DEVICE_3_9 %{AS_HEADER}device %{PATH:device} used %{INT:device-used-bytes:int}, contig-free %{INT:contig-free:int}M \(%{INT:free-wblocks:int} wblocks\), swb-free %{INT:swb-free:int}, w-q %{INT:write-q:int} w-tot %{INT:w-tot:int} \(%{NUMBER:writes-per-s:float}/s\), defrag-q %{INT:defrag-q:int} defrag-tot %{INT:defrag-read:int} \(%{NUMBER:defrag-read-per-s:float}/s\) defrag-w-tot %{INT:defrag-write:int} \(%{NUMBER:defrag-write-per-s:int}/s\)
+
