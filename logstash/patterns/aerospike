@@ -24,6 +24,7 @@ AS_TICK_FD %{AS_HEADER}   fds: proto %{PROTO_TUPLE} heartbeat %{HB_TUPLE} fabric
 AS_TICK_HB %{AS_HEADER}   heartbeat-received: self %{INT:hb-self:int} foreign %{INT:hb-foreign:int}
 AS_TICK_FAIL %{AS_HEADER}   early-fail: demarshal %{INT:demarshal:int} tsvc-client %{INT:tsvc-client:int} tsvc-batch-sub %{INT:tsvc-batch-sub:int} tsvc-udf-sub %{INT:tsvc-udf-sub:int}
 AS_TICK_BATCH %{AS_HEADER}   batch-index: batches \(%{INT:batch-success:int},%{INT:batch-error:int},%{INT:batch-timeout:int}\)
+AS_TICK_FABRIC %{AS_HEADER}   fabric-bytes-per-second: bulk \(%{INT:fab-bulk-rx:int},%{INT:fab-bulk-tx:int}\) ctrl \(%{INT:fab-ctrl-rx:int},%{INT:fab-ctrl-tx:int}\) meta \(%{INT:fab-meta-rx:int},%{INT:fab-meta-tx:int}\) rw \(%{INT:fab-rw-rx:int},%{INT:fab-rw-tx:int}\)
 
 AS_NS_OBJ %{AS_HEADER}{%{AS_NAMESPACE:namespace}} objects: all %{INT:objects:int} master %{INT:master:int} prole %{INT:prole:int}
 AS_NS_MIGRATE %{AS_HEADER}{%{AS_NAMESPACE:namespace}} migrations: (remaining \(%{INT:migrations-remaining-tx:int},%{INT:migrations-remaining-rx:int}\) active \(%{INT:migrations-active-tx:int},%{INT:migrations-active-rx:int}\) complete-pct %{NUMBER:migration-complete-pct:float})?%{AS_REST:rest}
@@ -34,7 +35,7 @@ AS_NS_BATCH %{AS_HEADER}{%{AS_NAMESPACE:namespace}} batch-sub: tsvc \(%{INT:batc
 AS_NS_SCAN %{AS_HEADER}{%{AS_NAMESPACE:namespace}} scan: basic \(%{INT:scan-basic-success:int},%{INT:scan-basic-error:int},%{INT:scan-basic-aborted:int}\) aggr \(%{INT:scan-aggr-success:int},%{INT:scan-aggr-error:int},%{INT:scan-aggr-aborted:int}\) udf-bg \(%{INT:scan-udf-bg-success:int},%{INT:scan-udf-bg-error:int},%{INT:scan-udf-bg-abort:int}\)
 AS_NS_QUERY %{AS_HEADER}{%{AS_NAMESPACE:namespace}} query: basic \(%{INT:query-basic-success:int},%{INT:query-basic-error:int}\) aggr \(%{INT:query-aggr-success:int},%{INT:query-aggr-error:int}\) udf-bg \(%{INT:query-udf-bg:int},%{INT:query-udf-bg:int}\)
 AS_NS_UDF %{AS_HEADER}{%{AS_NAMESPACE:namespace}} udf-sub: tsvc \(%{INT:udf-sub-tsvc-error:int},%{INT:udf-sub-tsvc-timeout:int}\) udf \(%{INT:udf-sub-udf-complete:int},%{INT:udf-sub-udf-error},%{INT:udf-sub-udf-timeout:int}\) lang \(%{INT:udf-sub-lang-read:int},%{INT:udf-sub-lang-write:int},%{INT:udf-sub-lang-delete:int},%{INT:udf-sub-lang-error:int}\)
-AS_NS_RETRANS %{AS_HEADER} retransmits: migration %{INT:retrans-migration:int} client-read %{INT:retrans-read-dup-res:int} client-write \(%{INT:retrans-write-dup-res:int},%{INT:retrans-write-repl-write:int}\) client-delete \(%{INT:retrans-delete-dup-res:int},%{INT:retrans-delete-repl-write:int}\) client-udf \(%{INT:retrans-udf-dup-res:int},%{INT:retrans-udf-repl-write:int}\) batch-sub %{INT:retrans-batch-sub:int} udf-sub \(%{INT:retrans-udf-sub-dup-res:int},%{INT:retrans-udf-sub-repl-write:int}\) nsup %{INT:retrans-nsup:int}
+AS_NS_RETRANS %{AS_HEADER}{%{AS_NAMESPACE:namespace}} retransmits: migration %{INT:retrans-migration:int} client-read %{INT:retrans-read-dup-res:int} client-write \(%{INT:retrans-write-dup-res:int},%{INT:retrans-write-repl-write:int}\) client-delete \(%{INT:retrans-delete-dup-res:int},%{INT:retrans-delete-repl-write:int}\) client-udf \(%{INT:retrans-udf-dup-res:int},%{INT:retrans-udf-repl-write:int}\) batch-sub %{INT:retrans-batch-sub:int} udf-sub \(%{INT:retrans-udf-sub-dup-res:int},%{INT:retrans-udf-sub-repl-write:int}\) nsup %{INT:retrans-nsup:int}
 
 # Tombstone
 TOMBSTONES %{AS_HEADER}{%{AS_NAMESPACE:namespace}} tombstones: all %{INT:tombstones:int} master %{INT:tomb-master:int} prole %{INT:tomb-prole:int}
@@ -50,9 +51,6 @@ AS_NSUP_WAITS %{AS_HEADER}nsup clear waits: %{INT:nsup-clear-waits:int}
 
 AS_SINDEX %{AS_HEADER}ns=%{AS_NAMESPACE:namespace} si=%{NOTSPACE:sindexes} obj-scanned=%{INT:sindex-obj-scanned:int} si-mem-used=%{INT:sindex-mem-used:int} progress=( )?%{INT:sindex-pct:int}\% est-time=%{INT:sindex-est-time:int} ms
 
-# Fabric, new in 3.11.1.1
-AS_FABRIC %{AS_HEADER}fabric-bytes-per-second: bulk \(%{INT:bulk-rx:int},%{INT:bulk-tx:int}\) ctrl \(%{INT:ctrl-rx:int},%{INT:ctrl-tx:int}\) meta \(%{INT:meta-rx:int},%{INT:mta-tx:int}\) rw \(%{INT:rw-rx:int},%{INT:rw-tx:int}\)
-
 # XDR logs
 AS_XDR_SUMMARY %{AS_HEADER}(summary: )?throughput %{INT:xdr-throughput:int}( :)? inflight %{INT:xdr-inflight:int}( :)? dlog[\- ]outstanding %{INT:xdr-dlog-outstanding:int} (dlog-delta-per-sec |\((delta )?)%{NUMBER:xdr-dlog-delta-per-s:float}(/s\))?
 AS_XDR_DETAIL %{AS_HEADER}(detail: )?sh %{INT:xdr-shipped:int}( :)? ul %{INT:xdr-ul:int}( :)? lg %{INT:xdr-lg:int}( :)? rlg %{INT:xdr-rlg:int}( :)?( rlgi %{INT:xdr-rlgi:int} rlgo %{INT:xdr-rlgo:int})? lproc %{INT:xdr-lproc:int}( :)? rproc %{INT:xdr-rproc:int}( :)? lkdproc %{INT:xdr-lkdproc:int}( :)? errcl %{INT:xdr-errcl:int}( :)? errsrv %{INT:xdr-errsrv:int}( :)? hkskip %{INT:xdr-hkskip:int}( hkf)? %{INT:xdr-hkf:int}( :)? flat %{INT:xdr-flat:int}
@@ -60,14 +58,19 @@ AS_XDR_BASE %{AS_HEADER}\[%{NOTSPACE:dc_name}\](: dc-state)? %{WORD:dc_status}( 
 AS_XDR_DLOG %{AS_HEADER}(dlog-q: capacity |logq : \()%{INT:xdr-dlog-cap:int} (used-elements )?%{INT:xdr-dlog-used:int} (read-offset )?%{INT:xdr-dlog-read-offset:int} (write-offset )?%{INT:xdr-dlog-write-offset:int}(\))?
 AS_XDR_DLOG_CLAIM %{AS_HEADER}(dlog: )?[Rr]eclaimed %{INT:xdr-dlog-reclaimed:int}%{AS_REST}
 
+# Errors
+AS_ERR_FD %{AS_HEADER}Error while connecting FD %{INT:fd:int}: %{AS_REST:err_code}
+AS_ERR_CONN %{AS_HEADER}Error while connecting socket to %{IP:ip}:%{INT:port:int}
+
 
 # OVERALL FILTERS
 #AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{AS_NS_CLIENT}|%{AS_NS_BATCH}|%{AS_NS_SCAN}|%{AS_NS_QUERY}|%{AS_NS_UDF}|%{AS_DEVICE}|%{AS_NS_BLOCK})
 AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{AS_NS_CLIENT}|%{AS_NS_BATCH}|%{AS_NS_SCAN}|%{AS_NS_QUERY}|%{AS_NS_UDF}|%{AS_NS_RETRANS})
-AS_TICK (?:%{AS_TICK_START}|%{AS_TICK_SYSTEM}|%{AS_TICK_PROG}|%{AS_TICK_FD}|%{AS_TICK_HB}|%{AS_TICK_FAIL}|%{AS_TICK_BATCH})
+AS_TICK (?:%{AS_TICK_START}|%{AS_TICK_SYSTEM}|%{AS_TICK_PROG}|%{AS_TICK_FD}|%{AS_TICK_HB}|%{AS_TICK_FAIL}|%{AS_TICK_BATCH}|%{AS_TICK_FABRIC})
 AS_XDR (?:%{AS_XDR_SUMMARY}|%{AS_XDR_DETAIL}|%{AS_XDR_BASE}|%{AS_XDR_DLOG}|%{AS_XDR_DLOG_CLAIM})
 AS_LOG %{AS_HEADER}%{AS_REST:rest}
 AS_NSUP (?:%{AS_NSUP_BASE}|%{AS_NSUP_WAITS})
+AS_ERR (?:%{AS_ERR_FD}|%{AS_ERR_CONN})
 
 # Device metrics
 AS_DEVICE_3_10 %{AS_HEADER}{%{AS_NAMESPACE:namespace}} %{PATH:device} used-bytes %{INT:device-used-bytes:int} free-wblocks %{INT:free-wblocks:int} write-q %{INT:write-q:int} write \(%{INT:w-tot:int},%{NUMBER:writes-per-s:float}\) defrag-q %{INT:defrag-q:int} defrag-read \(%{INT:defrag-read:int},%{NUMBER:defrag-read-per-s:float}\) defrag-write \(%{INT:defrag-write:int},%{NUMBER:defrag-write-per-s:float}\) ?(tomb-raider-read \(%{INT:tomb-raider-read:int},%{NUMBER:tomb-raider-read-per-s:float}\))?
