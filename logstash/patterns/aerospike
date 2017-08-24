@@ -41,11 +41,12 @@ AS_NS_RETRANS %{AS_HEADER}{%{AS_NAMESPACE:namespace}} retransmits: migration %{I
 TOMBSTONES %{AS_HEADER}{%{AS_NAMESPACE:namespace}} tombstones: all %{INT:tombstones:int} master %{INT:tomb-master:int} prole %{INT:tomb-prole:int}
 
 # HISTOGRAM
-HIST_START (?:%{AS_HEADER}histogram dump: )({%{AS_NAMESPACE:namespace}}-)?%{NOTSPACE:hist-name} \(%{INT:operation-total:int} total\) msec
+HIST_START (?:%{AS_HEADER}histogram dump: )({%{AS_NAMESPACE:namespace}}-)?%{NOTSPACE:hist-name} \(%{INT:operation-total:int} total\) (msec|count)
 
 # NSUP
 AS_NSUP_BASE %{AS_HEADER}{%{AS_NAMESPACE:namespace}} Records: %{INT:nsup-records:int}, %{INT:nsup-no-ttl:int} 0-vt, %{INT:nsup-expire:int}\(%{INT:nsup-expired:int}\) expired, %{INT:nsup-evict:int}\(%{INT:nsup-evicted:int}\) evicted, %{INT:nsup-set-delete:int}\(%{INT:nsup-set-deleted:int}\) set deletes(, %{INT:nsup-set-evict:int}\(%{INT:nsup-set-evicted:int}\) set evicted)?\. Evict ttl(s)?: %{INT:nsup-evict-ttl-low:int}(,%{INT:nsup-evict-ttl-high:int},%{NUMBER:nsup-evict-pct:float})?\. Waits: %{INT:nsup-set-waits:int},%{INT:nsup-clear-waits:int},%{INT:nsup-general-waits:int}\. Total time: %{INT:nsup-time:int} ms
-AS_NSUP_WAITS %{AS_HEADER}nsup clear waits: %{INT:nsup-clear-waits:int}
+AS_NSUP_3_14 %{AS_HEADER}{%{AS_NAMESPACE:namespace}} nsup-done: master-objects \(%{INT:nsup-records:float},%{INT:nsup-no-ttl:float}\) expired \(%{INT:nsup-expired:float},%{INT:nsup-expire:float}\) evicted \(%{INT:nsup-evicted:float},%{INT:nsup-evict:float}\) evict-ttl %{INT:nsup-evict-ttl-low:float} waits \(%{INT:nsup-general-waits:float},%{INT:nsup-clear-waits:float}\) total-ms %{INT:nsup-time:float}
+AS_NSUP_WAITS %{AS_HEADER}nsup clear waits: %{INT:nsup-clear-waits:float}
 
 # SINDEX
 
@@ -69,7 +70,7 @@ AS_NS (?:%{AS_NS_OBJ}|%{AS_NS_MIGRATE}|%{AS_NS_MEM}|%{AS_NS_MEM}|%{AS_NS_DEV}|%{
 AS_TICK (?:%{AS_TICK_START}|%{AS_TICK_SYSTEM}|%{AS_TICK_PROG}|%{AS_TICK_FD}|%{AS_TICK_HB}|%{AS_TICK_FAIL}|%{AS_TICK_BATCH}|%{AS_TICK_FABRIC})
 AS_XDR (?:%{AS_XDR_SUMMARY}|%{AS_XDR_DETAIL}|%{AS_XDR_BASE}|%{AS_XDR_DLOG}|%{AS_XDR_DLOG_CLAIM})
 AS_LOG %{AS_HEADER}%{AS_REST:rest}
-AS_NSUP (?:%{AS_NSUP_BASE}|%{AS_NSUP_WAITS})
+AS_NSUP (?:%{AS_NSUP_BASE}|%{AS_NSUP_3_14}|%{AS_NSUP_WAITS})
 AS_ERR (?:%{AS_ERR_FD}|%{AS_ERR_CONN})
 
 # Device metrics

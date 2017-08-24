@@ -7,6 +7,6 @@ AS_LINENUMBER (?:%{INT})
 AS_FILE (?:%{AS_FILENAME:filename}:%{AS_LINENUMBER:linenumber})
 AS_REST (?:.*)
 HIST_STAT (%{WORD:stat_cat}: %{WORD:stat} %{INT:value})
-AS_HEADER %{AS_LOGDATE:logdate}(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
+AS_HEADER %{AS_LOGDATE:logdate}([+-]\d{4})?(?:: )%{AS_LOGLEVEL:loglevel}(?: [(])%{AS_CONTEXT:context}(?:[)]: [(])%{AS_FILE:file}(?:[)] )
 
-HISTOGRAM %{AS_HEADER} (\(\d{2}: \d+\) ){1,4}
+HISTOGRAM %{AS_HEADER} (\(\d{2}: \d+\)){1,4}
